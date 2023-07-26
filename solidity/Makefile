@@ -7,6 +7,6 @@ all:
 	truncate -s -1 SwapPool.bin
 
 install: all
-	cp -v *.json ../python/erc20_swap_pool/data/
-	cp -v *.bin ../python/erc20_swap_pool/data/
+	cp -v *.json ../python/erc20_pool/data/
+	cp -v *.bin ../python/erc20_pool/data/
 

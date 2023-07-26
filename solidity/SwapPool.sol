@@ -6,27 +6,98 @@ pragma solidity ^0.8.0;
 // Description: Voting contract using ERC20 tokens as shares
 
 contract SwapPool {
+	// Implements EIP173
+	address public owner;
+
 	address registry;
 	address quoter;
 	uint256 feePpm;
 	address feeAddress;
+	bytes32 declaration;
+
+	string public name;
+	string public symbol;
+	uint256 public immutable decimals;
+
 	uint256 public totalSupply;
+
 	mapping ( address => uint256 ) fees;
-	
-	constructor(address _tokenRegistry) {
+
+	// Implements Seal
+	uint256 public sealState;
+	uint8 constant FEE_STATE = 1;
+	uint8 constant FEEADDRESS_STATE = 2;
+	uint256 constant public maxSealState = 3;
+
+	// Implements Seal
+	event SealStateChange(bool indexed _final, uint256 _sealState);
+
+	// EIP173
+	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner); // EIP173
+
+	constructor(string memory _name, string memory _symbol, uint8 _decimals, bytes32 _declaration, address _tokenRegistry) {
+		name = _name;
+		symbol = _symbol;
+		decimals = _decimals;
 		registry = _tokenRegistry;
+		declaration = _declaration;
+	}
+
+	function seal(uint256 _state) public returns(uint256) {
+		require(_state <= maxSealState, 'ERR_INVALID_STATE');
+		require(_state & sealState == 0, 'ERR_ALREADY_LOCKED');
+		sealState |= _state;
+		emit SealStateChange(sealState == maxSealState, sealState);
+		return uint256(sealState);
+	}
+
+	function isSealed(uint256 _state) public view returns(bool) {
+		require(_state < maxSealState);
+		if (_state == 0) {
+			return sealState == maxSealState;
+		}
+		return _state & sealState == _state;
+	}
+
+	// Change address for collecting fees
+	function setFeeAddress(address _feeAddress) public {
+		require(!isSealed(FEEADDRESS_STATE), "ERR_SEAL");
+		require(msg.sender == owner, "ERR_AXX");
+		feeAddress = _feeAddress;
+	}
+
+	// Change address for collecting fees
+	function setFee(uint256 _fee) public {
+		require(!isSealed(FEE_STATE), "ERR_SEAL");
+		require(msg.sender == owner, "ERR_AXX");
+		require(_fee < 1000000, "ERR_FEE_TOO_HIGH");
+		feePpm = _fee;
+	}
+
+	// Implements EIP173
+	function transferOwnership(address _newOwner) public returns (bool) {
+		address oldOwner;
+
+		require(msg.sender == owner);
+		oldOwner = owner;
+		owner = _newOwner;
+
+		emit OwnershipTransferred(oldOwner, owner);
+		return true;
 	}
 
 	function deposit(address _token, uint256 _value) public {
 		bool r;
 		bytes memory v;
 
-		allowedToken(_token, registry);
+		mustAllowedToken(_token, registry);
 
 		(r, v) = _token.call(abi.encodeWithSignature('transferFrom(address,address,uint256)', msg.sender, this, _value));
 		require(r, "ERR_TOKEN");
 		r = abi.decode(v, (bool));
 		require(r, "ERR_TRANSFER");
+
+		totalSupply += _value;
 	}
 
 	function getFee(uint256 _value) private view returns (uint256) {
@@ -71,7 +142,7 @@ contract SwapPool {
 
 		deposit(_inToken, _value);
 
-		(r, v) = _outToken.call(abi.encodeWithSignature('transferFrom(address,address,uint256)', this, msg.sender, netValue));
+		(r, v) = _outToken.call(abi.encodeWithSignature('transfer(address,uint256)', msg.sender, netValue));
 		require(r, "ERR_TOKEN");
 		r = abi.decode(v, (bool));
 		require(r, "ERR_TRANSFER");
@@ -81,11 +152,30 @@ contract SwapPool {
 		}
 	}
 
-	function withdraw(address _token, uint256 _value) public returns (uint256) {
+	// Withdraw token to fee address
+	function withdraw(address _outToken) public returns (uint256) {
+		uint256 balance;
 
+		balance = fees[_outToken];
+
+		return withdraw(_outToken, balance);
 	}
 
-	function allowedToken(address _token, address _registry) private {
+	function withdraw(address _outToken, uint256 _value) public returns (uint256) {
+		bool r;
+		bytes memory v;
+
+		require(feeAddress != address(0), "ERR_AXX");
+
+		(r, v) = _outToken.call(abi.encodeWithSignature('transferFrom(address,address,uint256)', this, feeAddress, _value));
+		require(r, "ERR_TOKEN");
+		r = abi.decode(v, (bool));
+		require(r, "ERR_TRANSFER");
+
+		return _value;
+	}
+
+	function mustAllowedToken(address _token, address _registry) private {
 		bool r;
 		bytes memory v;
 
@@ -97,5 +187,19 @@ contract SwapPool {
 		require(r, "ERR_REGISTRY");
 		r = abi.decode(v, (bool));
 		require(r, "ERR_UNAUTH_TOKEN");
+	}
+
+	// Implements EIP165
+	function supportsInterface(bytes4 _sum) public pure returns (bool) {
+		if (_sum == 0x01ffc9a7) { // ERC165
+			return true;
+		}
+		if (_sum == 0x9493f8b2) { // ERC173
+			return true;
+		}
+		if (_sum == 0x0d7491f8) { // Seal
+			return true;
+		}
+		return false;
 	}
 }
