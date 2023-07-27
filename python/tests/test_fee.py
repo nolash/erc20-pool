@@ -22,51 +22,56 @@ logg = logging.getLogger()
 
 class TestPoolBase(TestERC20Pool):
 
-    def test_deposit(self):
+    def test_swap_fee(self):
         nonce_oracle = RPCNonceOracle(self.accounts[0], conn=self.conn)
-        c = ERC20(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
-        (tx_hash, o) = c.approve(self.foo_address, self.accounts[0], self.pool_address, 1024)
-        self.rpc.do(o)
-
         c = Pool(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
-        (tx_hash, o) = c.deposit(self.pool_address, self.accounts[0], self.foo_address, 1024)
+        (tx_hash, o) = c.set_fee_address(self.pool_address, self.accounts[0], self.accounts[9])
         self.rpc.do(o)
         o = receipt(tx_hash)
-        r = self.rpc.do(o)
+        r = self.conn.do(o)
         self.assertEqual(r['status'], 1)
 
-        c = ERC20(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
-        o = c.balance_of(self.foo_address, self.pool_address, sender_address=self.accounts[0])
-        r = self.rpc.do(o)
-        self.assertEqual(int(r, 16), 1024)
+        (tx_hash, o) = c.set_fee(self.pool_address, self.accounts[0], 10000)
+        self.rpc.do(o)
+        o = receipt(tx_hash)
+        r = self.conn.do(o)
+        self.assertEqual(r['status'], 1)
 
-
-    def test_swap(self):
         nonce_oracle = RPCNonceOracle(self.accounts[0], conn=self.conn)
         c = ERC20(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
-        (tx_hash, o) = c.approve(self.foo_address, self.accounts[0], self.pool_address, 1024)
+        (tx_hash, o) = c.approve(self.foo_address, self.accounts[0], self.pool_address, 1000)
         self.rpc.do(o)
-
+       
         c = Pool(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
-        (tx_hash, o) = c.deposit(self.pool_address, self.accounts[0], self.foo_address, 1024)
+        (tx_hash, o) = c.deposit(self.pool_address, self.accounts[0], self.foo_address, 1000)
         self.rpc.do(o)
-
+      
         nonce_oracle = RPCNonceOracle(self.accounts[1], conn=self.conn)
         c = ERC20(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
-        (tx_hash, o) = c.approve(self.bar_address, self.accounts[1], self.pool_address, 768)
+        (tx_hash, o) = c.approve(self.bar_address, self.accounts[1], self.pool_address, 1000)
         self.rpc.do(o)
-
+        
         c = Pool(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
-        (tx_hash, o) = c.swap(self.pool_address, self.accounts[1], self.foo_address, self.bar_address, 768)
+        (tx_hash, o) = c.swap(self.pool_address, self.accounts[1], self.foo_address, self.bar_address, 1000)
         self.rpc.do(o)
-        o = receipt(tx_hash)
-        r = self.rpc.do(o)
-        self.assertEqual(r['status'], 1)
 
         c = ERC20(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
         o = c.balance_of(self.foo_address, self.accounts[1], sender_address=self.accounts[0])
         r = self.rpc.do(o)
-        self.assertEqual(int(r, 16), 768)
+        self.assertEqual(int(r, 16), 990)
+
+        nonce_oracle = RPCNonceOracle(self.accounts[2], conn=self.conn)
+        c = Pool(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
+        (tx_hash, o) = c.withdraw(self.pool_address, self.accounts[2], self.foo_address)
+        self.rpc.do(o)
+        o = receipt(tx_hash)
+        r = self.conn.do(o)
+        self.assertEqual(r['status'], 1)
+
+        c = ERC20(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
+        o = c.balance_of(self.foo_address, self.accounts[9], sender_address=self.accounts[0])
+        r = self.rpc.do(o)
+        self.assertEqual(int(r, 16), 10)
 
 
 if __name__ == '__main__':

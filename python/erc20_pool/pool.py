@@ -116,4 +116,37 @@ class Pool(TxFactory):
         return tx
 
 
+    def set_fee_address(self, contract_address, sender_address, fee_address, tx_format=TxFormat.JSONRPC, id_generator=None):
+        enc = ABIContractEncoder()
+        enc.method('setFeeAddress')
+        enc.typ(ABIContractType.ADDRESS)
+        enc.address(fee_address)
+        data = add_0x(enc.get())
+        tx = self.template(sender_address, contract_address, use_nonce=True)
+        tx = self.set_code(tx, data)
+        tx = self.finalize(tx, tx_format, id_generator=id_generator)
+        return tx
 
+
+    def set_fee(self, contract_address, sender_address, fee, tx_format=TxFormat.JSONRPC, id_generator=None):
+        enc = ABIContractEncoder()
+        enc.method('setFee')
+        enc.typ(ABIContractType.UINT256)
+        enc.uint256(fee)
+        data = add_0x(enc.get())
+        tx = self.template(sender_address, contract_address, use_nonce=True)
+        tx = self.set_code(tx, data)
+        tx = self.finalize(tx, tx_format, id_generator=id_generator)
+        return tx
+
+
+    def withdraw(self, contract_address, sender_address, token_address, tx_format=TxFormat.JSONRPC, id_generator=None):
+        enc = ABIContractEncoder()
+        enc.method('withdraw')
+        enc.typ(ABIContractType.ADDRESS)
+        enc.address(token_address)
+        data = add_0x(enc.get())
+        tx = self.template(sender_address, contract_address, use_nonce=True)
+        tx = self.set_code(tx, data)
+        tx = self.finalize(tx, tx_format, id_generator=id_generator)
+        return tx

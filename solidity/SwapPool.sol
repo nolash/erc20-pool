@@ -41,6 +41,7 @@ contract SwapPool {
 		decimals = _decimals;
 		registry = _tokenRegistry;
 		declaration = _declaration;
+		owner = msg.sender;
 	}
 
 	function seal(uint256 _state) public returns(uint256) {
@@ -157,6 +158,7 @@ contract SwapPool {
 		uint256 balance;
 
 		balance = fees[_outToken];
+		fees[_outToken] = 0;
 
 		return withdraw(_outToken, balance);
 	}
@@ -167,7 +169,7 @@ contract SwapPool {
 
 		require(feeAddress != address(0), "ERR_AXX");
 
-		(r, v) = _outToken.call(abi.encodeWithSignature('transferFrom(address,address,uint256)', this, feeAddress, _value));
+		(r, v) = _outToken.call(abi.encodeWithSignature('transfer(address,uint256)', feeAddress, _value));
 		require(r, "ERR_TOKEN");
 		r = abi.decode(v, (bool));
 		require(r, "ERR_TRANSFER");
