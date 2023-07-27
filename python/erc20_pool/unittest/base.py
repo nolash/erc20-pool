@@ -59,5 +59,6 @@ class TestERC20Pool(TestGiftableToken):
         r = self.rpc.do(o)
         self.assertEqual(r['status'], 1)
         self.pool_address = to_checksum_address(r['contract_address'])
+        self.address = self.pool_address
         logg.debug('published bar token {}, baz token {}'.format(self.bar_address, self.baz_address))
         logg.debug('published pool on address {} with hash {}'.format(self.pool_address, tx_hash))
