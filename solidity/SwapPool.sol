@@ -9,7 +9,8 @@ contract SwapPool {
 	// Implements EIP173
 	address public owner;
 
-	address registry;
+	address tokenRegistry;
+	address limitRegistry;
 	address quoter;
 	uint256 feePpm;
 	address feeAddress;
@@ -35,11 +36,12 @@ contract SwapPool {
 	// EIP173
 	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner); // EIP173
 
-	constructor(string memory _name, string memory _symbol, uint8 _decimals, bytes32 _declaration, address _tokenRegistry) {
+	constructor(string memory _name, string memory _symbol, uint8 _decimals, bytes32 _declaration, address _tokenRegistry, address _limitRegistry) {
 		name = _name;
 		symbol = _symbol;
 		decimals = _decimals;
-		registry = _tokenRegistry;
+		tokenRegistry = _tokenRegistry;
+		limitRegistry = _limitRegistry;
 		declaration = _declaration;
 		owner = msg.sender;
 	}
@@ -91,7 +93,8 @@ contract SwapPool {
 		bool r;
 		bytes memory v;
 
-		mustAllowedToken(_token, registry);
+		mustAllowedToken(_token, tokenRegistry);
+		mustWithinLimit(_token, _value);
 
 		(r, v) = _token.call(abi.encodeWithSignature('transferFrom(address,address,uint256)', msg.sender, this, _value));
 		require(r, "ERR_TOKEN");
@@ -177,18 +180,38 @@ contract SwapPool {
 		return _value;
 	}
 
-	function mustAllowedToken(address _token, address _registry) private {
+	function mustAllowedToken(address _token, address _tokenRegistry) private {
 		bool r;
 		bytes memory v;
 
-		if (_registry == address(0)) {
+		if (_tokenRegistry == address(0)) {
 			return;
 		}
 		
-		(r, v) = _registry.call(abi.encodeWithSignature('have(address)', _token));
+		(r, v) = _tokenRegistry.call(abi.encodeWithSignature('have(address)', _token));
 		require(r, "ERR_REGISTRY");
 		r = abi.decode(v, (bool));
 		require(r, "ERR_UNAUTH_TOKEN");
+	}
+	
+	function mustWithinLimit(address _token, uint256 _valueDelta) private {
+		bool r;
+		bytes memory v;
+		uint256 limit;
+		uint256 balance;
+
+		if (limitRegistry == address(0)) {
+			return;
+		}
+
+		(r, v) = limitRegistry.call(abi.encodeWithSignature("limitOf(address)", _token));
+		require(r, "ERR_TOKEN");
+		limit = abi.decode(v, (uint256));
+
+		(r, v) = _token.call(abi.encodeWithSignature("balanceOf(address)", this));
+		require(r, "ERR_TOKEN");
+		balance = abi.decode(v, (uint256));
+		require(balance + _valueDelta <= limit, "ERR_LIMIT");
 	}
 
 	// Implements EIP165
