@@ -204,7 +204,7 @@ contract SwapPool {
 			return;
 		}
 
-		(r, v) = limitRegistry.call(abi.encodeWithSignature("limitOf(address)", _token));
+		(r, v) = limitRegistry.call(abi.encodeWithSignature("limitOf(address, address)", _token, this));
 		require(r, "ERR_TOKEN");
 		limit = abi.decode(v, (uint256));
 
