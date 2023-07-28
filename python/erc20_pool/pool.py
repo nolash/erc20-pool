@@ -37,29 +37,29 @@ class Pool(TxFactory):
     __abi = None
     __bytecode = None
 
-    def constructor(self, sender_address, name, symbol, decimals, declaration=None, accounts_registry=None, limit_registry=None, tx_format=TxFormat.JSONRPC, version=None):
-        code = self.cargs(name, symbol, decimals, declaration=declaration, accounts_registry=accounts_registry, limit_registry=limit_registry, version=version)
+    def constructor(self, sender_address, name, symbol, decimals, declaration=None, token_registry=None, token_limiter=None, tx_format=TxFormat.JSONRPC, version=None):
+        code = self.cargs(name, symbol, decimals, declaration=declaration, token_registry=token_registry, token_limiter=token_limiter, version=version)
         tx = self.template(sender_address, None, use_nonce=True)
         tx = self.set_code(tx, code)
         return self.finalize(tx, tx_format)
 
 
     @staticmethod
-    def cargs(name, symbol, decimals, declaration=None, accounts_registry=None, limit_registry=None, version=None):
+    def cargs(name, symbol, decimals, declaration=None, token_registry=None, token_limiter=None, version=None):
         if declaration == None:
             declaration = ZERO_CONTENT
-        if accounts_registry == None:
-            accounts_registry = ZERO_ADDRESS
-        if limit_registry == None:
-            limit_registry = ZERO_ADDRESS
+        if token_registry == None:
+            token_registry = ZERO_ADDRESS
+        if token_limiter == None:
+            token_limiter = ZERO_ADDRESS
         code = Pool.bytecode(version=version)
         enc = ABIContractEncoder()
         enc.string(name)
         enc.string(symbol)
         enc.uint256(decimals)
         enc.bytes32(declaration)
-        enc.address(accounts_registry)
-        enc.address(limit_registry)
+        enc.address(token_registry)
+        enc.address(token_limiter)
         args = enc.get()
         code += args
         logg.debug('constructor code: ' + args)

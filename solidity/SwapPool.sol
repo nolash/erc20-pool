@@ -3,14 +3,14 @@ pragma solidity ^0.8.0;
 // Author:	Louis Holbrook <dev@holbrook.no> 0826EDA1702D1E87C6E2875121D2E7BB88C2A746
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // File-Version: 1
-// Description: Voting contract using ERC20 tokens as shares
+// Description: ACL-enabled ERC20 token swap for tokens with compatible properties.
 
 contract SwapPool {
 	// Implements EIP173
 	address public owner;
 
 	address tokenRegistry;
-	address limitRegistry;
+	address tokenLimiter;
 	address quoter;
 	uint256 feePpm;
 	address feeAddress;
@@ -36,12 +36,12 @@ contract SwapPool {
 	// EIP173
 	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner); // EIP173
 
-	constructor(string memory _name, string memory _symbol, uint8 _decimals, bytes32 _declaration, address _tokenRegistry, address _limitRegistry) {
+	constructor(string memory _name, string memory _symbol, uint8 _decimals, bytes32 _declaration, address _tokenRegistry, address _tokenLimiter) {
 		name = _name;
 		symbol = _symbol;
 		decimals = _decimals;
 		tokenRegistry = _tokenRegistry;
-		limitRegistry = _limitRegistry;
+		tokenLimiter = _tokenLimiter;
 		declaration = _declaration;
 		owner = msg.sender;
 	}
@@ -200,12 +200,13 @@ contract SwapPool {
 		uint256 limit;
 		uint256 balance;
 
-		if (limitRegistry == address(0)) {
+		if (tokenLimiter == address(0)) {
 			return;
 		}
 
-		(r, v) = limitRegistry.call(abi.encodeWithSignature("limitOf(address, address)", _token, this));
-		require(r, "ERR_TOKEN");
+
+		(r, v) = tokenLimiter.call(abi.encodeWithSignature("limitOf(address,address)", _token, this));
+		require(r, "ERR_LIMITER");
 		limit = abi.decode(v, (uint256));
 
 		(r, v) = _token.call(abi.encodeWithSignature("balanceOf(address)", this));

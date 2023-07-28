@@ -12,10 +12,6 @@ from giftable_erc20_token import GiftableToken
 # local imports
 from erc20_pool.unittest import TestERC20Pool
 from erc20_pool import Pool
-#from evm_tokenvote.unittest.base import hash_of_foo
-#from evm_tokenvote import Voter
-#from evm_tokenvote import ProposalState
-
 
 logging.basicConfig(level=logging.DEBUG)
 logg = logging.getLogger()
