@@ -1,0 +1,1 @@
+include erc20_pool/data/*.* *requirements.txt man/build/*.1
