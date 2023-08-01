@@ -28,8 +28,8 @@ contract SwapPool {
 	uint256 public sealState;
 	uint8 constant FEE_STATE = 1;
 	uint8 constant FEEADDRESS_STATE = 2;
-	uint8 constant QUOTER_STATE = 2;
-	uint256 constant public maxSealState = 3;
+	uint8 constant QUOTER_STATE = 4;
+	uint256 constant public maxSealState = 7;
 
 	// Implements Seal
 	event SealStateChange(bool indexed _final, uint256 _sealState);
