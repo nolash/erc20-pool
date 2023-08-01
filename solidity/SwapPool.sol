@@ -28,6 +28,7 @@ contract SwapPool {
 	uint256 public sealState;
 	uint8 constant FEE_STATE = 1;
 	uint8 constant FEEADDRESS_STATE = 2;
+	uint8 constant QUOTER_STATE = 2;
 	uint256 constant public maxSealState = 3;
 
 	// Implements Seal
@@ -75,6 +76,13 @@ contract SwapPool {
 		require(msg.sender == owner, "ERR_AXX");
 		require(_fee < 1000000, "ERR_FEE_TOO_HIGH");
 		feePpm = _fee;
+	}
+
+	// Change address for the quoter contract
+	function setQuoter(address _quoter) public {
+		require(!isSealed(QUOTER_STATE), "ERR_SEAL");
+		require(msg.sender == owner, "ERR_AXX");
+		quoter = _quoter;
 	}
 
 	// Implements EIP173
