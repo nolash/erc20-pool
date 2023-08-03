@@ -59,6 +59,7 @@ Some obvious concerns are:
 - Tokens are swapped denominated in their smallest unit (regardless of "decimals").
 - The unit of account of the tokens may differ.
 - The value of the tokens in relation to unit of account may differ.
+- The tokens may be subject to different rates of change.
 
 
 ### Providing quotes
@@ -69,7 +70,28 @@ The value returned from the "quoter" is the value of output tokens that will be 
 
 The "quoter" smart contract must satisfy the [CIC TokenQuote](https://git.grassecon.net/cicnet/cic-contracts/#tokenquote) interface.
 
-An example quoter contract `Quote.sol` can be found in this repository. The contract translates values according to the decimal count reported by the respective ERC20 tokens.
+An example quoter contract `DecimalQuote.sol` can be found in this repository. The contract translates values according to the decimal count reported by the respective ERC20 tokens.
+
+
+## Fees
+
+Using the `setFee` method, a fee may be specified, in parts-per-million, to be deducted from each token swap.
+
+The fee will be deducted from the input token _before_ the value is sent to the "quoter" (if defined).
+
+Fee is defined in _parts-per-million_, i.e. `1000000` equals `100%`. Any value less than 1000000 is value.
+
+
+### Fee recipient
+
+By default, all deducted fees are credited to the pool contract.
+
+Using the `setFeeAddress` method, an external beneficiary for the fees may be defined. That beneficiary will receive all fees _from that moment on_.
+
+Fees to be paid externally are accounted for internally in the contract, and may be withdrawn at any time using either the `withdraw(outToken)` or `withdraw(outToken, value)` method. (Note the difference in method signature from the exchange method: `withdraw(outToken, inToken, value)`.
+
+
+#### Withdrawing fees
 
 
 ## Sealing the contract
