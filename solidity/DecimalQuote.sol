@@ -15,11 +15,11 @@ contract DecimalQuote {
 		bytes memory v;
 
 		(r, v) = _outToken.call(abi.encodeWithSignature("decimals()"));
-		require(r, "ERR_TOKEN");
+		require(r, "ERR_TOKEN_OUT");
 		dout = abi.decode(v, (uint8));
 
 		(r, v) = _inToken.call(abi.encodeWithSignature("decimals()"));
-		require(r, "ERR_TOKEN");
+		require(r, "ERR_TOKEN_IN");
 		din = abi.decode(v, (uint8));
 
 		if (din == dout) {
