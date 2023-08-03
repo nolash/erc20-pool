@@ -2,7 +2,7 @@
 
 A token pool implementation that allows _deposits_ in the form of _liquidity donations_, and _withdrawals_ in the form of _token swaps_.
 
-It satisfies the [CIC TokenSwap](https://git.grassecon.net/cicnet/cic-contracts/) interface.
+It satisfies the [CIC TokenSwap](https://git.grassecon.net/cicnet/cic-contracts/#tokenswap) interface.
 
 
 ## Synopsis
@@ -29,21 +29,21 @@ The `tokenLimiter` parameter takes an address to a smart contract controlling va
 
 ### Token approval
 
-By specifying a non-zero contract address for the `tokenRegistry` property that implements the [CIC AccountsIndex]() interface, that contract can be used to allow and disallow which tokens can be used as input tokens to `deposit()` and `withdraw()`.
+By specifying a non-zero contract address for the `tokenRegistry` property that implements the [CIC ACL](https://git.grassecon.net/cicnet/cic-contracts/#acl) interface, that contract can be used to allow and disallow which tokens can be used as input tokens to `deposit()` and `withdraw()`.
 
 Tokens that are disallowed while the pool still holds a balance can still be withdrawn in full.
 
 
 ### Token limits
 
-By specifying a non-zero contract address for the `tokenRegistry` property that implements the [CIC TokenLimit]() interface, that contract can be used to control the value limit allowed for each token in the pool.
+By specifying a non-zero contract address for the `tokenRegistry` property that implements the [CIC TokenLimit](https://git.grassecon.net/cicnet/cic-contracts/#tokenlimit) interface, that contract can be used to control the value limit allowed for each token in the pool.
 
 Tokens that are limited below the current balance held by the pool can still be withdrawn. Once the balance goes below the limit, additional tokens values may again be swapped, up to the limit.
 
 
 #### Using limiter as registry
 
-The [erc20-limiter](https://holbrook.no/src/erc20-limiter/log.html) repository contains the smart contract implementation `LimiterIndex.sol`. This uses the token limit state to satisfy the [CIC AccountsIndex]() interface. Specifically, any token limit higher than 0 will be defined as allowed.
+The [erc20-limiter](https://holbrook.no/src/erc20-limiter/log.html) repository contains the smart contract implementation `LimiterIndex.sol`. This uses the token limit state to satisfy the [CIC ACL](https://git.grassecon.net/cicnet/cic-contracts/#acl) interface. Specifically, any token limit higher than 0 will be defined as allowed.
 
 This enables to publisher to use the same smart contract for both constructor arguments `tokenRegistry` and `tokenLimiter`. 
 
@@ -67,14 +67,14 @@ Using the `setQuoter()` method, a smart contract address can be defined that tra
 
 The value returned from the "quoter" is the value of output tokens that will be received in return for the value of input tokens specified.
 
-The "quoter" smart contract must satisfy the [CIC TokenQuote]() interface.
+The "quoter" smart contract must satisfy the [CIC TokenQuote](https://git.grassecon.net/cicnet/cic-contracts/#tokenquote) interface.
 
 An example quoter contract `Quote.sol` can be found in this repository. The contract translates values according to the decimal count reported by the respective ERC20 tokens.
 
 
 ## Sealing the contract
 
-The contract implements the [CIC Seal]() interface for the following properties:
+The contract implements the [CIC Seal](https://git.grassecon.net/cicnet/cic-contracts/#seal) interface for the following properties:
 
 - Fee value
 - Fee address
