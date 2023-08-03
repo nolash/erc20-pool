@@ -46,7 +46,16 @@ The [erc20-limiter](https://holbrook.no/src/erc20-limiter/log.html) repository c
 This enables to publisher to use the same smart contract for both constructor arguments `tokenRegistry` and `tokenLimiter`. 
 
 
-## Handling values
+## Swapping tokens
+
+The method used to execute token swaps is  `withdraw(outToken, inToken, value)`.
+
+The `value` argument refers to the value of `inToken` that will be transferred to the pool contract, in exchange for some value of `outToken` (see below).
+
+In order to successfully execute the swap, an ERC20 "approval" must exist for the pool contract to spend at least the value of `inToken` specified by the `value` argument.
+
+
+### Handling values
 
 The pool contract does no checking whatsoever regarding the sanity of allowing tokens in the pool.
 
