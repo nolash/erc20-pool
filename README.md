@@ -69,7 +69,7 @@ The value returned from the "quoter" is the value of output tokens that will be 
 
 The "quoter" smart contract must satisfy the [CIC TokenQuote](https://git.grassecon.net/cicnet/cic-contracts/#tokenquote) interface.
 
-An example quoter contract `Quote.sol` can be found in this repository. The contract translates values according to the decimal count reported by the respective ERC20 tokens.
+An example quoter contract `DecimalQuote.sol` can be found in this repository. The contract translates values according to the decimal count reported by the respective ERC20 tokens.
 
 
 ## Sealing the contract
