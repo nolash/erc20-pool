@@ -5,7 +5,6 @@ import enum
 
 # external imports
 from chainlib.eth.constant import ZERO_ADDRESS
-from chainlib.eth.constant import ZERO_CONTENT
 from chainlib.eth.contract import (
     ABIContractEncoder,
     ABIContractDecoder,
@@ -37,17 +36,15 @@ class Pool(TxFactory):
     __abi = None
     __bytecode = None
 
-    def constructor(self, sender_address, name, symbol, decimals, declaration=None, token_registry=None, token_limiter=None, tx_format=TxFormat.JSONRPC, version=None):
-        code = self.cargs(name, symbol, decimals, declaration=declaration, token_registry=token_registry, token_limiter=token_limiter, version=version)
+    def constructor(self, sender_address, name, symbol, decimals, token_registry=None, token_limiter=None, tx_format=TxFormat.JSONRPC, version=None):
+        code = self.cargs(name, symbol, decimals, token_registry=token_registry, token_limiter=token_limiter, version=version)
         tx = self.template(sender_address, None, use_nonce=True)
         tx = self.set_code(tx, code)
         return self.finalize(tx, tx_format)
 
 
     @staticmethod
-    def cargs(name, symbol, decimals, declaration=None, token_registry=None, token_limiter=None, version=None):
-        if declaration == None:
-            declaration = ZERO_CONTENT
+    def cargs(name, symbol, decimals, token_registry=None, token_limiter=None, version=None):
         if token_registry == None:
             token_registry = ZERO_ADDRESS
         if token_limiter == None:
@@ -57,7 +54,6 @@ class Pool(TxFactory):
         enc.string(name)
         enc.string(symbol)
         enc.uint256(decimals)
-        enc.bytes32(declaration)
         enc.address(token_registry)
         enc.address(token_limiter)
         args = enc.get()

@@ -57,10 +57,10 @@ class TestERC20PoolBase(TestGiftableToken):
         self.assertEqual(r['status'], 1)
 
 
-    def publish_pool(self, declaration=hash_of_foo, token_registry=None, token_limiter=None):
+    def publish_pool(self, token_registry=None, token_limiter=None):
         nonce_oracle = RPCNonceOracle(self.accounts[0], conn=self.conn)
         c = Pool(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
-        (tx_hash, o) = c.constructor(self.accounts[0], "Big Pool", "BIG", 16, declaration=declaration, token_registry=token_registry, token_limiter=token_limiter)
+        (tx_hash, o) = c.constructor(self.accounts[0], "Big Pool", "BIG", 16, token_registry=token_registry, token_limiter=token_limiter)
         self.rpc.do(o)
         o = receipt(tx_hash)
         r = self.rpc.do(o)

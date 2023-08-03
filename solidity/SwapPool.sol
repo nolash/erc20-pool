@@ -14,7 +14,6 @@ contract SwapPool {
 	address quoter;
 	uint256 feePpm;
 	address feeAddress;
-	bytes32 declaration;
 
 	string public name;
 	string public symbol;
@@ -37,13 +36,12 @@ contract SwapPool {
 	// EIP173
 	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner); // EIP173
 
-	constructor(string memory _name, string memory _symbol, uint8 _decimals, bytes32 _declaration, address _tokenRegistry, address _tokenLimiter) {
+	constructor(string memory _name, string memory _symbol, uint8 _decimals, address _tokenRegistry, address _tokenLimiter) {
 		name = _name;
 		symbol = _symbol;
 		decimals = _decimals;
 		tokenRegistry = _tokenRegistry;
 		tokenLimiter = _tokenLimiter;
-		declaration = _declaration;
 		owner = msg.sender;
 	}
 

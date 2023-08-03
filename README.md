@@ -16,11 +16,9 @@ It satisfies the [CIC TokenSwap](https://git.grassecon.net/cicnet/cic-contracts/
 
 ## Publishing the contract
 
-There are six constructor arguments.
+There are five constructor arguments.
 
 The first three, `name`, `symbol` and `decimals` have matching getter methods, are analogous to the ERC20 methods of the same name.
-
-The `declaration` parameter is optional and can be any arbitrary content. Typically it defines a content hash of data describing the pool resource. A value of `bytes32(0x0)` means "no declaration defined."
 
 The `tokenRegistry` parameter takes an address to a smart contract controlling which tokens are allowed in the pool. See "Token approval" below. A value of `address(0x0)` deactivates this control, and allows the pool to hold all tokens by default (although they may still be subject to value limits).
 
@@ -86,17 +84,24 @@ Fee is defined in _parts-per-million_, i.e. `1000000` equals `100%`. Any value l
 
 By default, all deducted fees are credited to the pool contract.
 
-Using the `setFeeAddress` method, an external beneficiary for the fees may be defined. That beneficiary will be eligible to receive all fees pending external payment _from that moment on_. Note that this does also include any fees that were not already claimed by a previous beneficiary.
+Using the `setFeeAddress` method, an external beneficiary for the fees may be defined. That beneficiary will be eligible to receive all fees pending external payment _from that moment on_.
+
+**Important!** Note that this does also include any fees that were not already claimed by a previous beneficiary.
 
 
 #### Withdrawing fees
 
-Fees to be paid externally are accounted for internally in the contract, and may be withdrawn at any time using either the `withdraw(outToken)` or `withdraw(outToken, value)` method. (Note the difference in method signature from the exchange method: `withdraw(outToken, inToken, value)`.
+Fees to be paid externally are accounted for internally in the contract, and may be withdrawn at any time using either the `withdraw(outToken)` or `withdraw(outToken, value)` method.
 
-## Sealing the contract
+Note the difference between the fee withdrawal methods, and the method signature from the exchange method: `withdraw(outToken, inToken, value)`.
+
+
+## Sealing contract properties
 
 The contract implements the [CIC Seal](https://git.grassecon.net/cicnet/cic-contracts/#seal) interface for the following properties:
 
 - Fee value
 - Fee address
 - Quoter contract address
+
+Sealing allowed token lists and/or their respective value limits is the responsibility of the provider contracts themselves.
