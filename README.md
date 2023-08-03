@@ -86,14 +86,12 @@ Fee is defined in _parts-per-million_, i.e. `1000000` equals `100%`. Any value l
 
 By default, all deducted fees are credited to the pool contract.
 
-Using the `setFeeAddress` method, an external beneficiary for the fees may be defined. That beneficiary will receive all fees _from that moment on_.
+Using the `setFeeAddress` method, an external beneficiary for the fees may be defined. That beneficiary will be eligible to receive all fees pending external payment _from that moment on_. Note that this does also include any fees that were not claimed by a previous beneficiary.
 
 
 #### Withdrawing fees
 
 Fees to be paid externally are accounted for internally in the contract, and may be withdrawn at any time using either the `withdraw(outToken)` or `withdraw(outToken, value)` method. (Note the difference in method signature from the exchange method: `withdraw(outToken, inToken, value)`.
-
-
 
 ## Sealing the contract
 
