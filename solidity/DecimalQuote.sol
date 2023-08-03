@@ -36,4 +36,15 @@ contract DecimalQuote {
 			return _value * d;
 		}	
 	}
+
+	// Implements EIP165
+	function supportsInterface(bytes4 _sum) public pure returns (bool) {
+		if (_sum == 0x01ffc9a7) { // ERC165
+			return true;
+		}
+		if (_sum == 0xdbb21d40) { // TokenQuote
+			return true;
+		}
+		return false;
+	}
 }
