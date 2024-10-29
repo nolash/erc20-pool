@@ -177,6 +177,7 @@ contract SwapPool {
 		bytes memory v;
 
 		require(feeAddress != address(0), "ERR_AXX");
+		require(_value <= fees[_outToken], "ERR_BALANCE");
 
 		(r, v) = _outToken.call(abi.encodeWithSignature('transfer(address,uint256)', feeAddress, _value));
 		require(r, "ERR_TOKEN");
